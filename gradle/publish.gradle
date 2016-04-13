@@ -1,0 +1,13 @@
+uploadArchives {
+
+    repositories {
+        mavenDeployer {
+            repository(url: System.getProperty('repo') ? System.getProperty('repo') : "${repo_releases_dev}") {
+                authentication(userName: "${repo_user}", password: "${repo_password}");
+            }
+            snapshotRepository(url: "${repo_snapshot}") {
+                authentication(userName: "${repo_user}", password: "${repo_password}");
+            }
+        }
+    }
+}

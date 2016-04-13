@@ -1,0 +1,34 @@
+apply plugin: 'sonar-runner'
+
+sonarRunner {
+    sonarProperties {
+        property "sonar.host.url", "http://sonar.docker:9000"
+        property "sonar.jdbc.url", "jdbc:postgresql://sonardb.docker/sonar?useUnicode=true&amp;characterEncoding=utf"
+        property "sonar.jdbc.driverClassName", "org.postgresql.Driver"
+        property "sonar.jdbc.username", "sonar"
+        property "sonar.jdbc.password", "secret"
+        property "sonar.projectKey", "stickynote-service"
+        property "sonar.projectName", "Stickynote service"
+        property 'sonar.sourceEncoding', 'UTF-8'
+        property "sonar.scm.url", "scm:git:http://gitlab.docker/nextbuild/service.git"
+        property "sonar.jacoco.reportPath", "$buildDir/jacoco/test.exec"
+        property "sonar.jacoco.itReportPath", "$buildDir/jacoco/integrationTest.exec"
+    }
+}
+
+allprojects {
+    apply plugin: 'jacoco'
+}
+
+tasks.withType(Test) { task ->
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/${task.name}.exec")
+    }
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled = true
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}

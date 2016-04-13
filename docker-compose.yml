@@ -1,0 +1,10 @@
+mongo:
+  image: mongo:3.0.6
+
+service:
+  build: ./build/docker
+  #image: service
+  ports:
+    - "8888:8080"
+  links:
+    - mongo:mongodb

@@ -1,0 +1,17 @@
+concurrent = 1
+
+[[runners]]
+  name = "dind1"
+  limit = 3
+  url = "http://gitlab.docker/ci"
+  token = "cdd74c1249d7f68a5ceb7b8c577c87"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "gitlab/dind:latest"
+    privileged = true
+    disable_cache = false
+    volumes = ["/var/lib/boot2docker/gitlab/runner/gradle_cache:/gradle:rw", "/cache"]
+    links = ["gitlab_sonardb_1:sonardb.docker", "gitlab_gitlab_1:gitlab.docker", "gitlab_artifactory_1:artifactory.docker"]
+  [runners.cache]
+    Insecure = false

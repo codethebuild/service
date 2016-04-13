@@ -1,0 +1,74 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url "${repo_url}" }
+        jcenter()
+    }
+    dependencies {
+        // spring-boot
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE"
+
+        // jmeter
+        classpath "com.github.kulya:jmeter-gradle-plugin:1.3.2-2.6"
+        classpath 'jcharts:jcharts:0.7.5'
+        classpath 'kg.apc:jmeter-plugins-extras-libs:1.1.3'
+    }
+}
+
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'jmeter'
+
+apply from: "${rootDir}/gradle/version.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/dependencies.gradle"
+apply from: "${rootDir}/gradle/jmeter.gradle"
+apply from: "${rootDir}/gradle/sonar.gradle"
+apply from: "${rootDir}/gradle/ittest.gradle"
+
+repositories {
+    mavenLocal()
+    maven { url "${repo_url}" }
+    jcenter()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+
+    compile libraries.springboot
+
+    compile libraries.tools,
+            libraries.swagger
+
+    testCompile libraries.test
+}
+
+mainClassName = 'stickynote.Application'
+
+processResources {
+    expand(project.properties)
+}
+
+test {
+    // Ignore failures is set to true to make differences between a failing and unstable build.
+    ignoreFailures = true
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
+
+// DOCKER
+task copyDockerfiles(type: Copy) {
+    from 'build/libs'
+    from 'src/main/resources/docker'
+    into 'build/docker'
+    rename { String fileName ->
+        fileName.replace("-$version","")
+    }
+}

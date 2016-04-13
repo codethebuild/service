@@ -1,0 +1,36 @@
+ext.buildTimeStamp = new Date().format('yyy-MM-dd HH:mm:ss')
+
+
+if (System.env.CI_BUILD_TAG) {
+    version = System.env.CI_TAG_NAME
+} else {
+    version = new ProjectVersion(1, 0, System.env.SOURCE_BUILD_NUMBER)
+}
+
+
+
+class ProjectVersion {
+    Integer major
+    Integer minor
+    String build
+
+    ProjectVersion(Integer major, Integer minor, String build) {
+        this.major = major
+        this.minor = minor
+        this.build = build
+    }
+
+
+    @Override
+    String toString() {
+        String fullVersion = "$major.$minor"
+
+        if (build) {
+            fullVersion += ".$build"
+        } else {
+            fullVersion += "-SNAPSHOT"
+        }
+
+        fullVersion
+    }
+}

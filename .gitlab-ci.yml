@@ -1,0 +1,90 @@
+# set gradle home to cache artifacts
+before_script:
+  - export GRADLE_USER_HOME=/gradle
+
+stages:
+  - build
+  - test
+  - qa
+
+assemble:
+  stage: build
+
+  image: npalm/java:oracle-java8
+
+  script:
+    - ./gradlew clean distTar copyDockerfiles
+
+  cache:
+    key: "$CI_BUILD_REF"
+    untracked: true
+
+test:
+  stage: test
+
+  image: npalm/java:oracle-java8
+
+  script:
+    - ./gradlew check
+
+  cache:
+    key: "$CI_BUILD_REF"
+    untracked: true
+
+ittest:
+  stage: test
+
+  image: npalm/dind-java:latest
+
+  script:
+    - ./gradlew assemble copyDockerfiles
+    - docker-compose build
+    - docker-compose up -d
+    #- docker run -d --name mongo mongo:3.0.6 --nojournal
+    #- docker build -t service build/docker
+    #- docker run -d --name service --link mongo:mongodb -p 8888:8080 service
+    #- ./wait.sh service 8888
+    - ./wait.sh service_service_1 8888
+    - ./gradlew integrationTest
+    - docker-compose stop
+    - docker-compose rm -v -f
+    #- ./gradlew jmeterRun
+
+  cache:
+    key: "$CI_BUILD_REF"
+    untracked: true
+
+
+performance:
+  stage: test
+
+  image: npalm/dind-java:latest
+
+  script:
+    - ./gradlew assemble copyDockerfiles
+    - docker-compose build
+    - docker-compose up -d
+    #- docker run -d --name mongo mongo:3.0.6 --nojournal
+    #- docker build -t service build/docker
+    #- docker run -d --name service --link mongo:mongodb -p 8888:8080 service
+    #- ./wait.sh service 8888
+    - ./wait.sh service_service_1 8888
+    - ./gradlew jmeterRun
+    - docker-compose stop
+    - docker-compose rm -v -f
+
+  cache:
+    key: "$CI_BUILD_REF"
+    untracked: true
+
+sonar:
+  stage: qa
+
+  image: npalm/java:oracle-java8
+
+  script:
+    - ./gradlew sonarRunner
+
+  cache:
+    key: "$CI_BUILD_REF"
+    untracked: true
